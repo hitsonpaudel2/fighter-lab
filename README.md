@@ -38,9 +38,9 @@ Visit : https://hitsonpaudel2.github.io/fighter-lab/
 
 ### View Live Website
 To launch the app directly, visit the live deployment link via GitHub Pages or your custom domain:
-> `https://<your-username>.github.io/fighter-lab/`
+> `https://hitsonpaudel2.github.io/fighter-lab/`
 
 ### Run Locally
 1. Clone this repository:
    ```bash
-   git clone [https://github.com/](https://github.com/)<your-username>/fighter-lab.git
+   git clone [https://github.com/](https://github.com/)hitsonpaudel2/fighter-lab.git
