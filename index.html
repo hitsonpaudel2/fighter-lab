@@ -1,24 +1,20 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FIGHTER LAB // Custom Training Generator</title>
+  <title>FIGHTER LAB // Custom Routine & Round Timer</title>
   <style>
     :root {
       --bg-dark: #080a0f;
       --card-bg: #121622;
       --card-border: #1e2638;
-      --primary: #ff2a5f;   /* Neon Pink/Red */
+      --primary: #ff2a5f;   /* Neon Red/Pink */
       --secondary: #00f2fe; /* Neon Cyan */
-      --accent: #7928ca;
+      --work-color: #ff2a5f;
+      --rest-color: #00e676; /* Neon Green */
       --text: #f0f4f8;
       --text-dim: #8b98a5;
-      --easy: #00e676;
-      --medium: #ffab00;
-      --hard: #ff1744;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -32,7 +28,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     header h1 {
@@ -46,7 +42,7 @@
 
     header p {
       color: var(--text-dim);
-      font-size: 1rem;
+      font-size: 0.95rem;
       margin-top: 5px;
     }
 
@@ -55,10 +51,107 @@
       margin: 0 auto;
     }
 
-    /* STEP 1: GOAL SELECTION GRID */
+    /* ROUND TIMER SECTION */
+    .timer-section {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 35px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .timer-title {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--secondary);
+      margin-bottom: 10px;
+    }
+
+    .timer-display {
+      font-size: 4.5rem;
+      font-weight: 800;
+      font-family: monospace;
+      letter-spacing: 2px;
+      color: var(--text);
+      margin: 10px 0;
+      text-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+
+    .timer-status {
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      color: var(--text-dim);
+    }
+
+    .timer-status.work { color: var(--work-color); text-shadow: 0 0 12px rgba(255,42,95,0.4); }
+    .timer-status.rest { color: var(--rest-color); text-shadow: 0 0 12px rgba(0,230,118,0.4); }
+
+    .timer-round-info {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--card-border);
+      color: var(--text);
+      border: none;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-start { background: var(--primary); color: #fff; }
+    .btn-start:hover { box-shadow: 0 0 15px rgba(255,42,95,0.4); }
+    
+    .btn-reset { background: var(--card-border); color: var(--text-dim); }
+
+    .preset-btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+      font-size: 0.8rem;
+    }
+
+    .btn-preset {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .btn-preset:hover { border-color: var(--secondary); color: #fff; }
+
+    /* GOAL SELECTION GRID */
     .goal-selection {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 20px;
       margin-bottom: 35px;
     }
@@ -67,198 +160,98 @@
       background: var(--card-bg);
       border: 2px solid var(--card-border);
       border-radius: 16px;
-      padding: 24px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
+      transition: all 0.3s ease;
     }
 
     .goal-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-4px);
       border-color: var(--secondary);
-      box-shadow: 0 8px 25px rgba(0, 242, 254, 0.15);
     }
 
     .goal-card.active {
       border-color: var(--primary);
       background: linear-gradient(180deg, rgba(255,42,95,0.1) 0%, var(--card-bg) 100%);
-      box-shadow: 0 8px 25px rgba(255, 42, 95, 0.25);
     }
 
-    .goal-icon {
-      font-size: 2.5rem;
-      margin-bottom: 12px;
-    }
+    .goal-icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .goal-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+    .goal-card p { font-size: 0.8rem; color: var(--text-dim); line-height: 1.3; }
 
-    .goal-card h3 {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-    }
-
-    .goal-card p {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      line-height: 1.4;
-    }
-
-    /* ROUTINE DASHBOARD */
+    /* DASHBOARD */
     .dashboard {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 300px 1fr;
       gap: 30px;
-      opacity: 1;
-      transition: opacity 0.4s ease;
     }
 
     @media (max-width: 850px) {
       .dashboard { grid-template-columns: 1fr; }
     }
 
-    /* LEFT SIDEBAR: ROUTINE INFO & 2D BODY */
     .sidebar {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 24px;
-      position: sticky;
-      top: 20px;
-      height: fit-content;
+      padding: 20px;
       text-align: center;
+      height: fit-content;
     }
+
+    .svg-container { display: flex; justify-content: center; margin: 15px 0; }
+    svg { width: 150px; height: 260px; }
+
+    .muscle { fill: #222a3d; transition: fill 0.3s ease; }
+    .muscle.highlight { fill: var(--primary) !important; filter: drop-shadow(0 0 8px var(--primary)); }
 
     .routine-meta {
       background: rgba(255,255,255,0.03);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 12px;
-      margin-bottom: 20px;
       text-align: left;
     }
 
-    .meta-item {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-    }
-
-    .meta-item:last-child { margin-bottom: 0; }
+    .meta-item { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
     .meta-val { font-weight: bold; color: var(--secondary); }
 
-    /* SVG 2D Muscle Diagram */
-    .svg-container {
-      display: flex;
-      justify-content: center;
-      margin: 15px 0;
-    }
-
-    svg {
-      width: 160px;
-      height: 280px;
-    }
-
-    .muscle {
-      fill: #222a3d;
-      transition: fill 0.3s ease, filter 0.3s ease;
-    }
-
-    .muscle.highlight {
-      fill: var(--primary) !important;
-      filter: drop-shadow(0 0 8px var(--primary));
-    }
-
-    /* RIGHT COLUMN: WORKOUT EXERCISES */
-    .workout-view {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .routine-title-box {
-      border-bottom: 2px solid var(--card-border);
-      padding-bottom: 12px;
-      margin-bottom: 10px;
-    }
-
-    .routine-title-box h2 {
-      font-size: 1.6rem;
-      color: var(--text);
-    }
-
-    .routine-title-box p {
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      margin-top: 4px;
-    }
+    /* WORKOUT VIEW */
+    .routine-title-box { border-bottom: 2px solid var(--card-border); padding-bottom: 12px; margin-bottom: 15px; }
+    .routine-title-box h2 { font-size: 1.5rem; }
+    .routine-title-box p { color: var(--text-dim); font-size: 0.88rem; margin-top: 4px; }
 
     .exercise-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      padding: 20px;
+      padding: 18px;
+      margin-bottom: 15px;
       display: grid;
-      grid-template-columns: 1fr 180px;
+      grid-template-columns: 1fr 160px;
       gap: 15px;
       align-items: center;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .exercise-card:hover {
-      border-color: var(--secondary);
-      transform: translateX(4px);
     }
 
     @media (max-width: 600px) {
       .exercise-card { grid-template-columns: 1fr; }
     }
 
-    .ex-main h4 {
-      font-size: 1.15rem;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    .ex-main p {
-      font-size: 0.88rem;
-      color: var(--text-dim);
-      line-height: 1.4;
-      margin-bottom: 10px;
-    }
-
-    .ex-tip {
-      font-size: 0.8rem;
-      color: var(--secondary);
-      font-style: italic;
-    }
+    .ex-main h4 { font-size: 1.1rem; margin-bottom: 5px; }
+    .ex-main p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 8px; }
+    .ex-tip { font-size: 0.78rem; color: var(--secondary); font-style: italic; }
 
     .ex-stats {
       background: rgba(0, 242, 254, 0.05);
       border: 1px solid rgba(0, 242, 254, 0.2);
       border-radius: 10px;
-      padding: 12px;
+      padding: 10px;
       text-align: center;
     }
 
-    .stat-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      letter-spacing: 1px;
-    }
-
-    .stat-value {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--primary);
-      margin: 2px 0;
-    }
-
-    .stat-rest {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-    }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); }
+    .stat-value { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin: 2px 0; }
   </style>
 </head>
 <body>
@@ -266,289 +259,287 @@
   <div class="container">
     <header>
       <h1>🥊 FIGHTER LAB</h1>
-      <p>Choose your objective to generate a structured home routine</p>
+      <p>Interactive Round Timer & Routine Generator</p>
     </header>
 
-    <!-- STEP 1: GOAL SELECTION -->
+    <!-- ROUND TIMER COMPONENT -->
+    <div class="timer-section" id="timerBox">
+      <div class="timer-title">⏱️ Fight Round Interval Timer</div>
+      <div class="timer-display" id="timeDisplay">03:00</div>
+      <div class="timer-status" id="timerStatus">READY TO START</div>
+      <div class="timer-round-info" id="roundInfo">Round 1 of 3</div>
+
+      <div class="timer-controls">
+        <button class="btn btn-start" id="startBtn" onclick="toggleTimer()">START</button>
+        <button class="btn btn-reset" onclick="resetTimer()">RESET</button>
+      </div>
+
+      <div class="preset-btns">
+        <span>Presets:</span>
+        <button class="btn-preset" onclick="setTimerPreset(3, 1, 3)">3 x 3m (Pro Boxing)</button>
+        <button class="btn-preset" onclick="setTimerPreset(2, 0.5, 4)">4 x 2m (Amateur)</button>
+        <button class="btn-preset" onclick="setTimerPreset(0.75, 0.25, 5)">5 x 45s (HIIT Abs)</button>
+      </div>
+    </div>
+
+    <!-- GOAL SELECTION -->
     <div class="goal-selection">
       <div class="goal-card active" onclick="setGoal('abs', this)">
         <div class="goal-icon">🔥</div>
         <h3>Abs Only</h3>
-        <p>Core hypertrophy, 6-pack isolation, and oblique sculpting.</p>
+        <p>Hypertrophy & core sculpting.</p>
       </div>
 
       <div class="goal-card" onclick="setGoal('fullbody', this)">
         <div class="goal-icon">💪</div>
-        <h3>Full Body (Home)</h3>
-        <p>Pure bodyweight exercises for chest, legs, arms, and back. Zero boxing.</p>
+        <h3>Full Body</h3>
+        <p>Pure bodyweight exercises. No boxing.</p>
       </div>
 
       <div class="goal-card" onclick="setGoal('boxing', this)">
         <div class="goal-icon">🥊</div>
         <h3>Boxing Skills</h3>
-        <p>Stance, footwork drills, punch mechanics, and combinations.</p>
+        <p>Stance, footwork, and combos.</p>
       </div>
 
       <div class="goal-card" onclick="setGoal('combo', this)">
         <div class="goal-icon">⚡</div>
         <h3>Boxing + Abs</h3>
-        <p>Full combat conditioning: heavy shadowboxing rounds paired with fighter core circuits.</p>
+        <p>Combat shadowboxing & core circuits.</p>
       </div>
     </div>
 
-    <!-- STEP 2: ROUTINE DASHBOARD -->
+    <!-- DASHBOARD -->
     <div class="dashboard">
-      
-      <!-- LEFT: ROUTINE SUMMARY & ANATOMICAL MAP -->
       <div class="sidebar">
         <h3>Targeted Muscles</h3>
-        
         <div class="svg-container">
           <svg viewBox="0 0 100 200">
-            <!-- Head -->
             <circle cx="50" cy="18" r="11" fill="#222a3d" />
-            <!-- Shoulders -->
             <circle id="m-shoulders-l" class="muscle" cx="28" cy="40" r="7" />
             <circle id="m-shoulders-r" class="muscle" cx="72" cy="40" r="7" />
-            <!-- Arms -->
             <rect id="m-arms-l" class="muscle" x="20" y="48" width="8" height="25" rx="3" />
             <rect id="m-arms-r" class="muscle" x="72" y="48" width="8" height="25" rx="3" />
-            <!-- Chest -->
             <path id="m-chest" class="muscle" d="M 36 38 L 64 38 L 60 55 L 40 55 Z" />
-            <!-- Abs -->
             <rect id="m-abs" class="muscle" x="40" y="58" width="20" height="24" rx="2" />
-            <!-- Obliques -->
             <rect id="m-obliques-l" class="muscle" x="34" y="58" width="5" height="22" rx="1" />
             <rect id="m-obliques-r" class="muscle" x="61" y="58" width="5" height="22" rx="1" />
-            <!-- Quads / Legs -->
             <rect id="m-legs-l" class="muscle" x="35" y="86" width="12" height="48" rx="4" />
             <rect id="m-legs-r" class="muscle" x="53" y="86" width="12" height="48" rx="4" />
           </svg>
         </div>
 
         <div class="routine-meta">
-          <div class="meta-item">
-            <span>Weekly Frequency:</span>
-            <span class="meta-val" id="metaFreq">3 - 4 Days / Wk</span>
-          </div>
-          <div class="meta-item">
-            <span>Est. Duration:</span>
-            <span class="meta-val" id="metaTime">20 Mins</span>
-          </div>
-          <div class="meta-item">
-            <span>Rest Between Sets:</span>
-            <span class="meta-val" id="metaRest">45 - 60 Secs</span>
-          </div>
+          <div class="meta-item"><span>Weekly Frequency:</span><span class="meta-val" id="metaFreq">3-4 Days/Wk</span></div>
+          <div class="meta-item"><span>Est. Duration:</span><span class="meta-val" id="metaTime">20 Mins</span></div>
+          <div class="meta-item"><span>Rest Period:</span><span class="meta-val" id="metaRest">45 Secs</span></div>
         </div>
       </div>
 
-      <!-- RIGHT: ROUTINE EXERCISES -->
       <div class="workout-view">
         <div class="routine-title-box">
           <h2 id="routineTitle">Abs Hypertrophy Routine</h2>
-          <p id="routineDesc">Perform these exercises in order with clean control and full range of motion.</p>
+          <p id="routineDesc">Perform exercises with clean control and full range of motion.</p>
         </div>
-
-        <div id="exerciseList">
-          <!-- Dynamically populated -->
-        </div>
+        <div id="exerciseList"></div>
       </div>
-
     </div>
   </div>
 
   <script>
-    // COMPLETE ROUTINES DATABASE
+    // --- BROWSER AUDIO SYNTHESIZER (NO EXTERNAL FILES NEEDED) ---
+    function playAudioBeep(freq = 600, duration = 0.2, type = 'sine') {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.log("Audio play error", e);
+      }
+    }
+
+    function playFightBell() {
+      // Triple High Beep simulating round bell
+      playAudioBeep(880, 0.25, 'triangle');
+      setTimeout(() => playAudioBeep(880, 0.25, 'triangle'), 300);
+      setTimeout(() => playAudioBeep(880, 0.4, 'triangle'), 600);
+    }
+
+    // --- TIMER ENGINE ---
+    let workSecs = 180; // 3 mins
+    let restSecs = 60;  // 1 min
+    let totalRounds = 3;
+    
+    let currentRound = 1;
+    let isWorkPhase = true;
+    let isTimerRunning = false;
+    let timerInterval = null;
+    let currentSeconds = workSecs;
+
+    function formatTime(secs) {
+      const m = Math.floor(secs / 60).toString().padStart(2, '0');
+      const s = (secs % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('timeDisplay').innerText = formatTime(currentSeconds);
+      document.getElementById('roundInfo').innerText = `Round ${currentRound} of ${totalRounds}`;
+      
+      const statusEl = document.getElementById('timerStatus');
+      if (!isTimerRunning && currentSeconds === workSecs && currentRound === 1) {
+        statusEl.innerText = "READY TO START";
+        statusEl.className = "timer-status";
+      } else if (isWorkPhase) {
+        statusEl.innerText = "🥊 FIGHT! (WORK)";
+        statusEl.className = "timer-status work";
+      } else {
+        statusEl.innerText = "🧘 REST & RECOVER";
+        statusEl.className = "timer-status rest";
+      }
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('startBtn');
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        btn.innerText = "RESUME";
+      } else {
+        isTimerRunning = true;
+        btn.innerText = "PAUSE";
+        playAudioBeep(600, 0.15); // tap sound
+        timerInterval = setInterval(tickTimer, 1000);
+      }
+    }
+
+    function tickTimer() {
+      if (currentSeconds > 1) {
+        currentSeconds--;
+        // Countdown warning sound for last 3 seconds
+        if (currentSeconds <= 3) {
+          playAudioBeep(440, 0.1);
+        }
+      } else {
+        // Phase transition
+        playFightBell();
+        if (isWorkPhase) {
+          // Switch to Rest
+          isWorkPhase = false;
+          currentSeconds = restSecs;
+        } else {
+          // Switch to Next Round
+          if (currentRound < totalRounds) {
+            currentRound++;
+            isWorkPhase = true;
+            currentSeconds = workSecs;
+          } else {
+            // Workout Complete
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            document.getElementById('startBtn').innerText = "START";
+            document.getElementById('timerStatus').innerText = "🏆 WORKOUT COMPLETE!";
+            document.getElementById('timerStatus').className = "timer-status work";
+            return;
+          }
+        }
+      }
+      updateTimerDisplay();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      isWorkPhase = true;
+      currentRound = 1;
+      currentSeconds = workSecs;
+      document.getElementById('startBtn').innerText = "START";
+      updateTimerDisplay();
+    }
+
+    function setTimerPreset(wMins, rMins, rounds) {
+      workSecs = wMins * 60;
+      restSecs = rMins * 60;
+      totalRounds = rounds;
+      resetTimer();
+    }
+
+    // --- ROUTINE GENERATOR LOGIC ---
     const routines = {
       abs: {
         title: "🔥 Abs Hypertrophy Routine",
-        desc: "Designed for high tension and muscle contraction to build visible, thick abdominal blocks.",
-        freq: "3 - 4 Days / Wk",
-        time: "20 Minutes",
-        rest: "45 Seconds",
+        desc: "Designed for high tension and muscle contraction to build visible ab blocks.",
+        freq: "3-4 Days/Wk", time: "20 Mins", rest: "45 Secs",
         muscles: ['m-abs', 'm-obliques-l', 'm-obliques-r'],
         exercises: [
-          {
-            name: "1. Crunches with Top Pause",
-            desc: "Lie flat with knees bent. Squeeze your upper abs to raise shoulders off the mat. Hold at the top for 1 full second.",
-            sets: "3 Sets",
-            reps: "15 - 20 Reps",
-            tip: "Do not pull on your neck—focus on pulling ribs toward hips."
-          },
-          {
-            name: "2. Bicycle Crunches",
-            desc: "Alternate bringing opposite elbow to opposite knee while fully extending the other leg.",
-            sets: "3 Sets",
-            reps: "20 Reps Total",
-            tip: "Twist slowly with control rather than rushing."
-          },
-          {
-            name: "3. Lying Leg Raises",
-            desc: "Keep back flat against floor. Raise straight legs up to 90 degrees, then lower back down slowly without touching ground.",
-            sets: "3 Sets",
-            reps: "12 - 15 Reps",
-            tip: "Targets lower abs. If your lower back arches, bend knees slightly."
-          },
-          {
-            name: "4. Elbow Plank Hold",
-            desc: "Maintain a rigid line from head to heels with glutes and abs tight.",
-            sets: "3 Sets",
-            reps: "45 - 60 Secs",
-            tip: "Push forearms into ground so shoulders do not sag."
-          }
+          { name: "1. Crunches with Top Pause", desc: "Squeeze upper abs, raise shoulders, hold at top for 1 sec.", sets: "3 Sets", reps: "15-20 Reps", tip: "Do not pull on neck." },
+          { name: "2. Bicycle Crunches", desc: "Alternate opposite elbow to knee in smooth motion.", sets: "3 Sets", reps: "20 Total", tip: "Twist slowly with control." },
+          { name: "3. Lying Leg Raises", desc: "Raise legs to 90 degrees, lower slowly without touching floor.", sets: "3 Sets", reps: "12-15 Reps", tip: "Keep lower back flat on ground." },
+          { name: "4. Elbow Plank Hold", desc: "Rigid posture from head to heels with abs tight.", sets: "3 Sets", reps: "45-60 Secs", tip: "Push forearms into floor." }
         ]
       },
-
       fullbody: {
-        title: "💪 Full Body At-Home Strength (No Boxing)",
-        desc: "Strictly bodyweight training covering chest, shoulders, triceps, legs, and core.",
-        freq: "3 Days / Wk",
-        time: "35 - 40 Minutes",
-        rest: "60 - 90 Seconds",
+        title: "💪 Full Body At-Home Strength",
+        desc: "Strictly bodyweight training covering chest, shoulders, triceps, and legs.",
+        freq: "3 Days/Wk", time: "35 Mins", rest: "60-90 Secs",
         muscles: ['m-chest', 'm-shoulders-l', 'm-shoulders-r', 'm-arms-l', 'm-arms-r', 'm-legs-l', 'm-legs-r', 'm-abs'],
         exercises: [
-          {
-            name: "1. Standard Floor Push-ups",
-            desc: "Hands slightly wider than shoulders. Lower chest until 1 inch off floor, then drive up explosively.",
-            sets: "4 Sets",
-            reps: "12 - 15 Reps",
-            tip: "Keeps chest, shoulders, and triceps engaged."
-          },
-          {
-            name: "2. Bodyweight Deep Squats",
-            desc: "Feet shoulder-width apart. Squat down until hips drop below knee level, drive up through heels.",
-            sets: "4 Sets",
-            reps: "20 Reps",
-            tip: "Builds quad and glute strength."
-          },
-          {
-            name: "3. Chair / Couch Dips",
-            desc: "Grip edge of sturdy chair behind you. Bend elbows to 90 degrees to lower body, then push straight back up.",
-            sets: "3 Sets",
-            reps: "12 - 15 Reps",
-            tip: "Directly targets triceps and front shoulders."
-          },
-          {
-            name: "4. Walking / Reverse Lunges",
-            desc: "Step backward with one leg, lowering rear knee until it almost touches floor. Alternate legs.",
-            sets: "3 Sets",
-            reps: "12 Reps / Leg",
-            tip: "Improves leg balance and knee stability."
-          },
-          {
-            name: "5. Pike Push-ups",
-            desc: "Pike hips into an inverted V position. Lower top of head toward floor between hands.",
-            sets: "3 Sets",
-            reps: "8 - 10 Reps",
-            tip: "Generates heavy shoulder press strength."
-          }
+          { name: "1. Standard Floor Push-ups", desc: "Lower chest to 1 inch off floor, drive up explosively.", sets: "4 Sets", reps: "12-15 Reps", tip: "Engages chest, shoulders, triceps." },
+          { name: "2. Bodyweight Deep Squats", desc: "Squat down until hips drop below knees, drive through heels.", sets: "4 Sets", reps: "20 Reps", tip: "Builds leg power base." },
+          { name: "3. Chair / Couch Dips", desc: "Bend elbows to 90 degrees, push back up.", sets: "3 Sets", reps: "12-15 Reps", tip: "Directly targets triceps." },
+          { name: "4. Reverse Lunges", desc: "Step backward, lowering knee near floor. Alternate legs.", sets: "3 Sets", reps: "12 / Leg", tip: "Improves leg balance." }
         ]
       },
-
       boxing: {
         title: "🥊 Boxing Technical & Speed Routine",
-        desc: "Focuses purely on stance mechanics, punch technique, footwork balance, and combinations.",
-        freq: "3 - 4 Days / Wk",
-        time: "30 Minutes",
-        rest: "60 Seconds",
+        desc: "Focuses on fight stance, punch mechanics, and combinations.",
+        freq: "3-4 Days/Wk", time: "30 Mins", rest: "60 Secs",
         muscles: ['m-shoulders-l', 'm-shoulders-r', 'm-arms-l', 'm-arms-r', 'm-legs-l', 'm-legs-r'],
         exercises: [
-          {
-            name: "Round 1: Stance & Step-Drag Footwork",
-            desc: "Maintain fight guard. Step forward, backward, left, and right using step-drag mechanics without crossing feet.",
-            sets: "3 Rounds",
-            reps: "3 Mins / Round",
-            tip: "Keep knees soft and weight evenly distributed 50/50."
-          },
-          {
-            name: "Round 2: Straight Punches (1-2 Drill)",
-            desc: "Shadowbox throwing Jab (1) and Cross (2). Focus on snapping lead hand and pivoting rear hip on Cross.",
-            sets: "3 Rounds",
-            reps: "3 Mins / Round",
-            tip: "Exhale through teeth on every punch."
-          },
-          {
-            name: "Round 3: 3-Punch Combinations (1-2-3)",
-            desc: "Jab - Cross - Lead Hook. Pivot lead heel outward when throwing the hook.",
-            sets: "3 Rounds",
-            reps: "3 Mins / Round",
-            tip: "Always pull hands straight back to guard face."
-          },
-          {
-            name: "Round 4: Slip & Counter Cross",
-            desc: "Slip head slightly off-center to simulate dodging jab, immediately fire rear Cross counter.",
-            sets: "3 Rounds",
-            reps: "3 Mins / Round",
-            tip: "Movement should be small and efficient."
-          }
+          { name: "Round 1: Stance & Step-Drag Footwork", desc: "Step in 4 directions without crossing feet.", sets: "3 Rounds", reps: "3 Mins / Rd", tip: "Keep knees soft and balanced." },
+          { name: "Round 2: Straight Punches (1-2 Drill)", desc: "Jab-Cross combination with hip rotation.", sets: "3 Rounds", reps: "3 Mins / Rd", tip: "Exhale through teeth on every punch." },
+          { name: "Round 3: 1-2-3 Combo Flow", desc: "Jab, Cross, Lead Hook. Pivot lead heel outward on hook.", sets: "3 Rounds", reps: "3 Mins / Rd", tip: "Return hands straight to face." }
         ]
       },
-
       combo: {
         title: "⚡ Boxing + Fighter Abs Conditioning",
-        desc: "Combines high-intensity shadowboxing rounds with rotational core work for total fighter conditioning.",
-        freq: "4 Days / Wk",
-        time: "40 Minutes",
-        rest: "60 Seconds",
+        desc: "Combines high-intensity shadowboxing rounds with core circuits.",
+        freq: "4 Days/Wk", time: "40 Mins", rest: "60 Secs",
         muscles: ['m-shoulders-l', 'm-shoulders-r', 'm-arms-l', 'm-arms-r', 'm-abs', 'm-obliques-l', 'm-obliques-r'],
         exercises: [
-          {
-            name: "Part 1: Shadowboxing (1-2-3-2 Flow)",
-            desc: "Throw Jab-Cross-Hook-Cross combination continuously with footwork for full round.",
-            sets: "3 Rounds",
-            reps: "3 Mins / Round",
-            tip: "Maintains shoulder conditioning and punch rhythm."
-          },
-          {
-            name: "Part 2: Sit-Up to 1-2 Punch",
-            desc: "Full sit-up; at the top extension, fire a sharp Jab and Cross before returning down.",
-            sets: "3 Sets",
-            reps: "15 Reps",
-            tip: "Converts abdominal power into straight punching power."
-          },
-          {
-            name: "Part 3: Russian Twists",
-            desc: "Sit with knees bent, lean torso back 45 degrees. Twist shoulders left to right touching floor.",
-            sets: "3 Sets",
-            reps: "20 Reps Total",
-            tip: "Builds fast oblique rotation for hook punches."
-          },
-          {
-            name: "Part 4: Plank Shoulder Taps",
-            desc: "High plank position. Tap right shoulder with left hand, then left shoulder with right hand.",
-            sets: "3 Sets",
-            reps: "45 Sec Hold",
-            tip: "Keeps core stable when taking body strikes."
-          }
+          { name: "Part 1: Shadowboxing (1-2-3-2 Flow)", desc: "Throw Jab-Cross-Hook-Cross combination continuously.", sets: "3 Rounds", reps: "3 Mins / Rd", tip: "Builds shoulder endurance." },
+          { name: "Part 2: Sit-Up to 1-2 Punch", desc: "Sit up fully, fire a sharp Jab and Cross at top.", sets: "3 Sets", reps: "15 Reps", tip: "Transfers ab power to punches." },
+          { name: "Part 3: Russian Twists", desc: "Lean back 45 degrees, twist shoulders left and right.", sets: "3 Sets", reps: "20 Reps", tip: "Builds fast oblique rotation." }
         ]
       }
     };
 
     function setGoal(goalKey, cardEl) {
-      // Update Card Visuals
       document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
       cardEl.classList.add('active');
 
       const data = routines[goalKey];
-
-      // Update Text Info
       document.getElementById('routineTitle').innerText = data.title;
       document.getElementById('routineDesc').innerText = data.desc;
       document.getElementById('metaFreq').innerText = data.freq;
       document.getElementById('metaTime').innerText = data.time;
       document.getElementById('metaRest').innerText = data.rest;
 
-      // Highlight 2D Body Map
       document.querySelectorAll('.muscle').forEach(m => m.classList.remove('highlight'));
       data.muscles.forEach(mId => {
         const el = document.getElementById(mId);
         if (el) el.classList.add('highlight');
       });
 
-      // Render Exercise Cards
       const exContainer = document.getElementById('exerciseList');
       exContainer.innerHTML = '';
-
       data.exercises.forEach(ex => {
         const el = document.createElement('div');
         el.className = 'exercise-card';
@@ -556,20 +547,20 @@
           <div class="ex-main">
             <h4>${ex.name}</h4>
             <p>${ex.desc}</p>
-            <div class="ex-tip">💡 Form Tip: ${ex.tip}</div>
+            <div class="ex-tip">💡 Tip: ${ex.tip}</div>
           </div>
           <div class="ex-stats">
             <div class="stat-label">Volume</div>
             <div class="stat-value">${ex.sets}</div>
-            <div class="stat-value" style="font-size:0.95rem; color:#fff;">${ex.reps}</div>
-            <div class="stat-rest">Rest: ${data.rest}</div>
+            <div class="stat-value" style="font-size:0.9rem; color:#fff;">${ex.reps}</div>
           </div>
         `;
         exContainer.appendChild(el);
       });
     }
 
-    // Default Launch: Abs
+    // Init Defaults
+    updateTimerDisplay();
     setGoal('abs', document.querySelectorAll('.goal-card')[0]);
   </script>
 </body>
